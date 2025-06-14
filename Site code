@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>암호화 & 복호화기</title>
+  <style>
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      padding: 2rem;
+      background-color: #f0f0f5;
+      color: #333;
+    }
+    input, textarea, button {
+      display: block;
+      margin: 1rem 0;
+      padding: 0.5rem;
+      width: 100%;
+      max-width: 500px;
+      font-size: 1rem;
+    }
+    button {
+      width: 200px;
+      cursor: pointer;
+    }
+    #output {
+      white-space: pre-wrap;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      max-width: 500px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔐 암호화 / 복호화기</h1>
+  
+  <label for="plaintext">원문 (영어 대문자 A-Z만)</label>
+  <input type="text" id="plaintext" placeholder="HELLO">
+  
+  <label for="keyword">키워드 (영어 대문자 A-Z만)</label>
+  <input type="text" id="keyword" placeholder="KEY">
+  
+  <button onclick="encrypt()">암호화</button>
+  <button onclick="decrypt()">복호화</button>
+  
+  <h3>결과</h3>
+  <div id="output"></div>
+  
+  <script>
+    function letterToNumber(c) {
+      return c.charCodeAt(0) - 64; // A = 65 → 1
+    }
+
+    function numberToLetter(n) {
+      // 1~26을 다시 A~Z로
+      n = ((n - 1 + 26) % 26) + 1;  // 범위 보정 (복호화에서 음수 방지)
+      return String.fromCharCode(n + 64);
+    }
+
+    function prepareKeyArray(keyword, length) {
+      const keyNums = [...keyword].map(letterToNumber);
+      const fullKey = [];
+      for (let i = 0; i < length; i++) {
+        fullKey.push(keyNums[i % keyNums.length]);
+      }
+      return fullKey;
+    }
+
+    function encrypt() {
+      const text = document.getElementById('plaintext').value.toUpperCase().replace(/[^A-Z]/g, '');
+      const key = document.getElementById('keyword').value.toUpperCase().replace(/[^A-Z]/g, '');
+      if (!text || !key) return alert("원문과 키워드를 입력하세요!");
+      
+      const keyArray = prepareKeyArray(key, text.length);
+      const result = [...text].map((char, i) => {
+        const plainNum = letterToNumber(char);
+        const encryptedNum = plainNum + keyArray[i];
+        return numberToLetter(encryptedNum);
+      });
+
+      document.getElementById('output').textContent = result.join('');
+    }
+
+    function decrypt() {
+      const text = document.getElementById('plaintext').value.toUpperCase().replace(/[^A-Z]/g, '');
+      const key = document.getElementById('keyword').value.toUpperCase().replace(/[^A-Z]/g, '');
+      if (!text || !key) return alert("암호문과 키워드를 입력하세요!");
+      
+      const keyArray = prepareKeyArray(key, text.length);
+      const result = [...text].map((char, i) => {
+        const cipherNum = letterToNumber(char);
+        const decryptedNum = cipherNum - keyArray[i];
+        return numberToLetter(decryptedNum);
+      });
+
+      document.getElementById('output').textContent = result.join('');
+    }
+  </script>
+
+</body>
+</html>
